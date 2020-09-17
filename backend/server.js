@@ -1,32 +1,38 @@
 "use strict";
 
-const http = require("http");
 const express = require("express");
-const socketIO = require("socket.io");
-const fs = require("fs");
+const session = require("express-session");
 
 const app = express();
+const PORT = 9090;
 
-const port = 3000;
+const cors = require("cors");
+app.use(cors());
 
-// const cors = require("cors");
-// app.use(cors());
+app.use(
+  session({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: true,
+    cookie: ("name", "value", { maxAge: 5 * 60 * 1000, secure: false }),
+  })
+);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!!!");
+app.use("/login", function (req, res) {
+  // config session
+  console.log(req.session.userinfo);
+  req.session.userinfo = "Alex";
+  res.send("successful login！");
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+app.use("/", function (req, res) {
+  // fetch session
+  console.log(req.session);
+  if (req.session.userinfo) {
+    res.send("hello " + req.session.userinfo + "，welcome");
+  } else {
+    res.send("NOT loggged in");
+  }
 });
 
-// const server = http.createServer(app);
-// // const serverSocket = socketIO(server, { origins: "*:*" });
-// const serverSocket = socketIO(server);
-
-// console.log("Server listening 9090");
-// server.listen(9090);
-
-// serverSocket.on("connection", (socket) => {
-//   console.log("Server: connected!");
-// });
+app.listen(PORT);
