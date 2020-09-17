@@ -7,7 +7,14 @@ const app = express();
 const PORT = 9090;
 
 const cors = require("cors");
-app.use(cors());
+// app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:8080", "https://localhost:8080"],
+    credentials: true,
+    exposedHeaders: ["set-cookie"],
+  })
+);
 
 app.use(
   session({
@@ -18,16 +25,22 @@ app.use(
   })
 );
 
+// if app.use, the order maters. "/" must be at the end
 app.use("/login", function (req, res) {
   // config session
-  console.log(req.session.userinfo);
+  // console.log(req.session.userinfo);
   req.session.userinfo = "Alex";
-  res.send("successful login！");
+  res.send("successful log in！");
+});
+
+app.use("/logout", function (req, res) {
+  req.session.destroy();
+  res.send("You'vd logged out!!");
 });
 
 app.use("/", function (req, res) {
   // fetch session
-  console.log(req.session);
+  // console.log(req.session);
   if (req.session.userinfo) {
     res.send("hello " + req.session.userinfo + "，welcome");
   } else {

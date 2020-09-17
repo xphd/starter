@@ -1,31 +1,50 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
+    <button @click="pingBackend()">ping backend</button>
+    <button @click="login()">login</button>
+    <button @click="logout()">logout</button>
+    <p>Server: {{responseMessage}}</p>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "axios";
 export default {
   name: "HelloWorld",
   props: {
     msg: String,
   },
+  data() {
+    return {
+      responseMessage: "",
+      baseUrl: "http://localhost:9090",
+    };
+  },
   methods: {
+    pingBackend() {
+      this.visit("/");
+    },
     login() {
-      const options = {
+      this.visit("/login");
+    },
+    logout() {
+      this.visit("/logout");
+    },
+    visit(append) {
+      let options = {
         method: "GET",
-        headers: { crossdomain: true },
-        url: "http://localhost:9090/login",
+        url: this.baseUrl + append,
+        // headers: { crossdomain: true },
       };
-      axios(options).then((res) => {
-        // console.log(res["status"]);
-        console.log("Server:", res["data"]);
+      this.axios(options).then((res) => {
+        // console.log("Server:", res["data"]);
+        this.responseMessage = res["data"];
       });
     },
   },
   mounted() {
-    this.login();
+    // this.login();
   },
 };
 </script>
