@@ -6,6 +6,13 @@ const session = require("express-session");
 const app = express();
 const PORT = 9090;
 
+// >------>
+const redis = require("redis");
+const connect_redis = require("connect-redis");
+const redisStore = connect_redis(session);
+const redisClient = redis.createClient(6379, "127.0.0.1");
+// <------<
+
 const cors = require("cors");
 // app.use(cors());
 app.use(
@@ -18,6 +25,9 @@ app.use(
 
 app.use(
   session({
+    // >------>
+    store: new redisStore({ client: redisClient }),
+    // <------<
     secret: "keyboard cat",
     resave: false,
     saveUninitialized: true,
