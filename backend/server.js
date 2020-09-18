@@ -38,11 +38,12 @@ app.use(
 // if app.use, the order maters. "/" must be at the end
 app.use("/login", function (req, res) {
   // config session
-  // console.log(req.session.userinfo);
+
   if (req.session.userinfo) {
     res.send(req.session.userinfo + "has logged in");
   } else {
     req.session.userinfo = Math.random();
+    console.log(req.session);
     res.send("successful log in！");
   }
 });
