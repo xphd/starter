@@ -39,8 +39,12 @@ app.use(
 app.use("/login", function (req, res) {
   // config session
   // console.log(req.session.userinfo);
-  req.session.userinfo = "Alex";
-  res.send("successful log in！");
+  if (req.session.userinfo) {
+    res.send(req.session.userinfo + "has logged in");
+  } else {
+    req.session.userinfo = Math.random();
+    res.send("successful log in！");
+  }
 });
 
 app.use("/logout", function (req, res) {
