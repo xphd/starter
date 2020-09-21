@@ -3,7 +3,10 @@
     <h1>{{ msg }}</h1>
     <button @click="pingBackend()">ping backend</button>
     <button @click="login()">login</button>
+    <button @click="addData()">add data</button>
+    <button @click="getData()">get data</button>
     <button @click="logout()">logout</button>
+
     <p>Server: {{responseMessage}}</p>
   </div>
 </template>
@@ -19,6 +22,7 @@ export default {
     return {
       responseMessage: "",
       baseUrl: "http://localhost:9090",
+      data: null,
     };
   },
   methods: {
@@ -27,6 +31,12 @@ export default {
     },
     login() {
       this.visit("/login");
+    },
+    addData() {
+      this.visit("/addData");
+    },
+    getData() {
+      this.visit("/getData");
     },
     logout() {
       this.visit("/logout");
@@ -39,7 +49,14 @@ export default {
       };
       this.axios(options).then((res) => {
         // console.log("Server:", res["data"]);
-        this.responseMessage = res["data"];
+        console.log(typeof res["data"]);
+        if (typeof res["data"] === "object") {
+          console.log("get object");
+          this.data = res["data"];
+          console.log(this.data);
+        } else {
+          this.responseMessage = res["data"];
+        }
       });
     },
   },

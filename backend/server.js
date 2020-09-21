@@ -1,5 +1,20 @@
 "use strict";
 
+var fs = require("fs");
+var parse = require("csv-parse");
+var csvData = [];
+fs.createReadStream("./poverty_short.csv")
+  .pipe(parse({ delimiter: ":" }))
+  .on("data", function (csvrow) {
+    // console.log(csvrow);
+    //do something with csvrow
+    csvData.push(csvrow);
+  })
+  .on("end", function () {
+    //do something with csvData
+    // console.log(csvData);
+  });
+
 const express = require("express");
 const session = require("express-session");
 
@@ -43,7 +58,10 @@ app.use("/login", function (req, res) {
     res.send(req.session.userinfo + "has logged in");
   } else {
     req.session.userinfo = Math.random();
+    console.log(Object.keys(req));
+    console.log(req.sessionID);
     console.log(req.session);
+
     res.send("successful log in！");
   }
 });
@@ -51,6 +69,25 @@ app.use("/login", function (req, res) {
 app.use("/logout", function (req, res) {
   req.session.destroy();
   res.send("You'vd logged out!!");
+});
+
+app.use("/addData", function (req, res) {
+  if (req.session.userinfo) {
+    req.session.data = csvData;
+    res.send("data added");
+  } else {
+    console.log("not logged in");
+    res.send("You are NOT logged in");
+  }
+});
+
+app.use("/getData", function (req, res) {
+  if (req.session.userinfo) {
+    res.json(req.session.data);
+  } else {
+    console.log("not logged in");
+    res.send("You are NOT logged in");
+  }
 });
 
 app.use("/", function (req, res) {
