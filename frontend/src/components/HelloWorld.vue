@@ -49,6 +49,7 @@ export default {
       };
       this.axios(options).then((res) => {
         // console.log("Server:", res["data"]);
+        console.log(append);
         console.log(typeof res["data"]);
         if (typeof res["data"] === "object") {
           console.log("get object");

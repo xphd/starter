@@ -13,6 +13,7 @@
     "connect-redis": "^5.0.0",
     "cors": "^2.8.5",
     "csv-parse": "^4.12.0",
+    "csv-string": "^4.0.1",
     "express": "^4.16.4",
     "express-session": "^1.17.1",
     "fs": "^0.0.1-security",

@@ -1,8 +1,12 @@
 "use strict";
 
+const csvString = require("csv-string");
+
 var fs = require("fs");
 var parse = require("csv-parse");
+
 var csvData = [];
+let csvDataString = "";
 fs.createReadStream("./poverty_short.csv")
   .pipe(parse({ delimiter: ":" }))
   .on("data", function (csvrow) {
@@ -13,6 +17,11 @@ fs.createReadStream("./poverty_short.csv")
   .on("end", function () {
     //do something with csvData
     // console.log(csvData);
+    // console.log(typeof String(csvData[0]));
+    // console.log(String(csvData));
+    csvDataString = csvString.stringify(csvData);
+    console.log(typeof csvDataString);
+    // console.log(csvDataString);
   });
 
 const express = require("express");
@@ -72,8 +81,13 @@ app.use("/logout", function (req, res) {
 });
 
 app.use("/addData", function (req, res) {
+  // redisClient
   if (req.session.userinfo) {
-    req.session.data = csvData;
+    // req.session.data = csvData;
+    let sessionID = req.sessionID;
+    let dataID = sessionID + "data";
+
+    redisClient.set(dataID, csvDataString, redis.print);
     res.send("data added");
   } else {
     console.log("not logged in");
@@ -83,7 +97,14 @@ app.use("/addData", function (req, res) {
 
 app.use("/getData", function (req, res) {
   if (req.session.userinfo) {
-    res.json(req.session.data);
+    let sessionID = req.sessionID;
+    let dataID = sessionID + "data";
+    redisClient.get(dataID, function (err, reply) {
+      // console.log(reply);
+      // console.log(typeof reply);
+      res.json(csvString.parse(reply));
+    });
+    // res.json(req.session.data);
   } else {
     console.log("not logged in");
     res.send("You are NOT logged in");
