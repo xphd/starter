@@ -1,10 +1,16 @@
 import Vue from "vue";
 import App from "./App.vue";
 
+let host = location.host;
+let pathname = location.pathname;
+console.log(host);
+console.log(pathname);
+
 import VueSocketIO from "vue-socket.io";
 const socket = new VueSocketIO({
   debug: true,
-  connection: "http://localhost:9090"
+  // connection: "http://localhost:9090",
+  connection: location + "/socket.io",
 });
 Vue.use(socket);
 
@@ -22,5 +28,5 @@ Vue.config.productionTip = false;
 new Vue({
   render: function(h) {
     return h(App);
-  }
+  },
 }).$mount("#app");

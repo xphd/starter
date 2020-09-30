@@ -14,10 +14,12 @@ RUN apt update
 RUN apt install -y -q --no-install-recommends yarn 
 
 
-RUN cd frontend && yarn install
+# RUN cd frontend && yarn install
 
-RUN cd backend && yarn install
+# RUN cd backend && yarn install
 
-EXPOSE 8080 9090
+# ENTRYPOINT ["/bin/bash"]
+
+EXPOSE 8080
 
 CMD ./start.sh

@@ -7,11 +7,12 @@ const fs = require("fs");
 
 const app = express();
 const server = http.createServer(app);
-const serverSocket = socketIO(server, { origins: "*:*" });
+// const serverSocket = socketIO(server, { origins: "*:*" });
+const serverSocket = socketIO(server);
 
 console.log("Server listening 9090");
 server.listen(9090);
 
-serverSocket.on("connection", socket => {
+serverSocket.on("connection", (socket) => {
   console.log("Server: connected!");
 });
