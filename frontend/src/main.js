@@ -1,6 +1,11 @@
 import Vue from "vue";
 import App from "./App.vue";
 
+import axios from "axios";
+import VueAxios from "vue-axios";
+// axios.defaults.withCredentials = true;
+Vue.use(VueAxios, axios);
+
 let host = location.host;
 let pathname = location.pathname;
 console.log(host);
