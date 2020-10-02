@@ -14,16 +14,16 @@ export default {
   },
   data() {
     return {
-      responseMessage: "",
+      responseMessage: "status",
       baseUrl: "http://localhost:9090",
       data: null,
     };
   },
-  sockets: {
-    connect() {
-      console.log("Vue: connected!");
-    },
-  },
+  // sockets: {
+  //   connect() {
+  //     console.log("Vue: connected!");
+  //   },
+  // },
 
   methods: {
     pingBackend() {
