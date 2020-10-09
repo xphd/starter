@@ -6,8 +6,8 @@
 
     <button @click="logout()">logout</button>
 
-    <!-- <button @click="addData()">add data</button>
-    <button @click="getData()">get data</button> -->
+    <button @click="addData()">add data</button>
+    <button @click="getData()">get data</button>
 
     <p>Server: {{ responseMessage }}</p>
   </div>
@@ -44,12 +44,12 @@ export default {
     logout() {
       this.httpVisit("/logout");
     },
-    // addData() {
-    //   this.visit("/addData");
-    // },
-    // getData() {
-    //   this.visit("/getData");
-    // },
+    addData() {
+      this.socketVisit("addData");
+    },
+    getData() {
+      this.socketVisit("getData");
+    },
     httpVisit(append) {
       let options = {
         method: "GET",
@@ -69,9 +69,15 @@ export default {
         }
       });
     },
+    socketVisit(append) {
+      this.$socket.emit(append);
+    },
   },
   mounted() {
     // this.login();
+    // console.log("emit myConnection");
+    // this.$socket.emit("myConnection");
+    this.pingBackend();
   },
 };
 </script>

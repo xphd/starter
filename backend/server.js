@@ -52,13 +52,25 @@ const session = express_session({
 });
 
 const sharedsession = require("express-socket.io-session");
+
+app.use(session);
+
 serverSocket.use(
   sharedsession(session, {
     autoSave: true, // must have to update redis
   })
 );
+
 serverSocket.on("connection", (socket) => {
   console.log("Server: connected!");
+  socket.on("addData", function () {
+    console.log("addData");
+
+    console.log("socket:", socket.handshake.sessionID);
+    // socket.handshake.session.userdata = userdata;
+    // socket.handshake.session.save();
+    // console.log(socket.handshake.session);
+  });
 });
 
 const cors = require("cors");
@@ -70,8 +82,6 @@ app.use(
     exposedHeaders: ["set-cookie"],
   })
 );
-
-app.use(session);
 
 // if app.use, the order maters. "/" must be at the end
 app.use("/login", function (req, res) {
@@ -86,6 +96,7 @@ app.use("/login", function (req, res) {
     // console.log(req.session);
     res.send("successful log in！");
   }
+  console.log("after login:", req.session);
 });
 
 app.use("/logout", function (req, res) {
@@ -99,11 +110,13 @@ app.use("/logout", function (req, res) {
 
 app.use("/", function (req, res) {
   // fetch session
-  // console.log(req.session);
+  console.log("app:", req.sessionID);
+
   if (req.session.userinfo) {
     res.send("hello " + req.session.userinfo + "，welcome");
   } else {
     res.send("NOT loggged in");
   }
 });
+
 server.listen(PORT);
