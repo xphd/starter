@@ -3,11 +3,13 @@
     <h1>{{ msg }}</h1>
     <button @click="pingBackend()">ping backend</button>
     <button @click="login()">login</button>
-    <button @click="addData()">add data</button>
-    <button @click="getData()">get data</button>
+
     <button @click="logout()">logout</button>
 
-    <p>Server: {{responseMessage}}</p>
+    <!-- <button @click="addData()">add data</button>
+    <button @click="getData()">get data</button> -->
+
+    <p>Server: {{ responseMessage }}</p>
   </div>
 </template>
 
@@ -25,23 +27,30 @@ export default {
       data: null,
     };
   },
+  sockets: {
+    connect() {
+      console.log("Vue: connected!");
+      this.responseMessage = "Vue: connected!";
+    },
+  },
   methods: {
     pingBackend() {
-      this.visit("/");
+      this.httpVisit("/");
     },
     login() {
-      this.visit("/login");
+      this.httpVisit("/login");
     },
-    addData() {
-      this.visit("/addData");
-    },
-    getData() {
-      this.visit("/getData");
-    },
+
     logout() {
-      this.visit("/logout");
+      this.httpVisit("/logout");
     },
-    visit(append) {
+    // addData() {
+    //   this.visit("/addData");
+    // },
+    // getData() {
+    //   this.visit("/getData");
+    // },
+    httpVisit(append) {
       let options = {
         method: "GET",
         url: this.baseUrl + append,

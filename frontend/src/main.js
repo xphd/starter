@@ -1,6 +1,13 @@
 import Vue from "vue";
 import App from "./App.vue";
 
+import VueSocketIO from "vue-socket.io";
+const socket = new VueSocketIO({
+  debug: true,
+  connection: "http://localhost:9090",
+});
+Vue.use(socket);
+
 import axios from "axios";
 import VueAxios from "vue-axios";
 axios.defaults.withCredentials = true;
