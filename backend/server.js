@@ -26,6 +26,7 @@ fs.createReadStream("./poverty_short.csv")
 
 const express = require("express");
 const express_session = require("express-session");
+const sharedsession = require("express-socket.io-session");
 
 const app = express();
 const http = require("http");
@@ -50,53 +51,32 @@ const session = express_session({
   saveUninitialized: true,
   cookie: ("name", "value", { maxAge: 5 * 60 * 1000, secure: false }),
 });
-
-const sharedsession = require("express-socket.io-session");
-
 app.use(session);
 
-serverSocket.use(
-  sharedsession(session, {
-    autoSave: true, // must have to update redis
-  })
-);
-
-serverSocket.on("connection", (socket) => {
-  console.log("Server: connected!");
-  socket.on("addData", function () {
-    console.log("addData");
-
-    console.log("socket:", socket.handshake.sessionID);
-    // socket.handshake.session.userdata = userdata;
-    // socket.handshake.session.save();
-    // console.log(socket.handshake.session);
-  });
-});
-
 const cors = require("cors");
-// app.use(cors());
-app.use(
-  cors({
-    origin: ["http://localhost:8080", "https://localhost:8080"],
-    credentials: true,
-    exposedHeaders: ["set-cookie"],
-  })
-);
+let corsOptions = {
+  origin: ["http://localhost:8080", "https://localhost:8080"],
+  credentials: true,
+  exposedHeaders: ["set-cookie"],
+};
+app.use(cors(corsOptions));
 
 // if app.use, the order maters. "/" must be at the end
 app.use("/login", function (req, res) {
-  // config session
-
+  console.log("http /login");
+  console.log("req.sessionID:", req.sessionID);
   if (req.session.userinfo) {
+    console.log("session.userinfo:", req.session.userinfo);
     res.send(req.session.userinfo + " has logged in");
   } else {
     req.session.userinfo = Math.random();
     // console.log(Object.keys(req));
     // console.log(req.sessionID);
     // console.log(req.session);
+    console.log("session.userinfo:", req.session.userinfo);
     res.send("successful log in！");
   }
-  console.log("after login:", req.session);
+  // console.log("after login:", req.session);
 });
 
 app.use("/logout", function (req, res) {
@@ -110,13 +90,29 @@ app.use("/logout", function (req, res) {
 
 app.use("/", function (req, res) {
   // fetch session
-  console.log("app:", req.sessionID);
-
+  console.log("http /, sessionID:", req.sessionID);
   if (req.session.userinfo) {
     res.send("hello " + req.session.userinfo + "，welcome");
   } else {
     res.send("NOT loggged in");
   }
+});
+
+serverSocket.use(
+  sharedsession(session, {
+    autoSave: true, // must have to update redis
+  })
+);
+
+serverSocket.on("connection", (socket) => {
+  console.log("Server: connected!");
+  socket.on("addData", function () {
+    console.log(">>>>>>>>>>>>>>>");
+    console.log("socket: addData called");
+    console.log("userinfo:", socket.handshake.session.userinfo);
+    console.log("sessionID:", socket.handshake.sessionID);
+    console.log("<<<<<<<<<<<<<<<");
+  });
 });
 
 server.listen(PORT);

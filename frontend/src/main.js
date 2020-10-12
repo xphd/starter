@@ -5,7 +5,7 @@ import VueSocketIO from "vue-socket.io";
 const socket = new VueSocketIO({
   debug: true,
   connection: "http://localhost:9090",
-  options: { autoConnect: false },
+  options: { autoConnect: false }, // socket won't connect automatically. Must use "this.$socket.connect()" somewhere
 });
 Vue.use(socket);
 

@@ -1,20 +1,16 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <button @click="pingBackend()">ping backend</button>
+    <button @click="ping()">ping</button>
     <button @click="login()">login</button>
-
-    <button @click="logout()">logout</button>
-
-    <button @click="addData()">add data</button>
-    <button @click="getData()">get data</button>
-
+    <button @click="logout()" :disabled="!isLoggedin">logout</button>
+    <button @click="addData()" :disabled="!isLoggedin">add data</button>
+    <button @click="getData()" :disabled="!isLoggedin">get data</button>
     <p>Server: {{ responseMessage }}</p>
   </div>
 </template>
 
 <script>
-// import axios from "axios";
 export default {
   name: "HelloWorld",
   props: {
@@ -22,30 +18,42 @@ export default {
   },
   data() {
     return {
-      responseMessage: "",
+      responseMessage: null,
       baseUrl: "http://localhost:9090",
       data: null,
+      isLoggedin: false,
     };
   },
   sockets: {
     connect() {
       console.log("Vue: connected!");
       this.responseMessage = "Vue: connected!";
-      // this.$socket.emit("reload");
     },
   },
   methods: {
-    pingBackend() {
+    ping() {
       this.httpVisit("/");
-
-      // this.$socket.disconnect();
     },
     login() {
-      this.httpVisit("/login");
-      this.$socket.connect();
+      this.isLoggedin = true;
+      // this.$socket.disconnect();
+      // this.$socket.connect();
+      // this.httpVisit("/login");
+      let append = "/login";
+      console.log("httpVisit:", append);
+      let options = {
+        method: "GET",
+        url: this.baseUrl + append,
+      };
+      this.axios(options).then((res) => {
+        this.responseMessage = res["data"];
+        this.$socket.disconnect();
+        this.$socket.connect();
+      });
     },
-
     logout() {
+      this.isLoggedin = false;
+      this.$socket.disconnect();
       this.httpVisit("/logout");
     },
     addData() {
@@ -55,6 +63,7 @@ export default {
       this.socketVisit("getData");
     },
     httpVisit(append) {
+      console.log("httpVisit:", append);
       let options = {
         method: "GET",
         url: this.baseUrl + append,
@@ -62,8 +71,8 @@ export default {
       };
       this.axios(options).then((res) => {
         // console.log("Server:", res["data"]);
-        console.log(append);
-        console.log(typeof res["data"]);
+        console.log("httpVisit res:", append);
+        console.log("type of res['data']:", typeof res["data"]);
         if (typeof res["data"] === "object") {
           console.log("get object");
           this.data = res["data"];
@@ -73,18 +82,13 @@ export default {
         }
       });
     },
-    socketVisit(append) {
-      this.$socket.emit(append);
+    socketVisit(event) {
+      console.log("socketVisit:", event);
+      this.$socket.emit(event);
     },
   },
   mounted() {
-    // this.login();
-    // console.log("emit myConnection");
-    // this.$socket.emit("myConnection");
-    // this.pingBackend();
-  },
-  created() {
-    this.pingBackend();
+    this.ping();
   },
 };
 </script>
