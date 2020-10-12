@@ -3,10 +3,22 @@
     <h1>{{ msg }}</h1>
     <button @click="ping()">ping</button>
     <button @click="login()">login</button>
-    <button @click="logout()" :disabled="!isLoggedin">logout</button>
-    <button @click="addData()" :disabled="!isLoggedin">add data</button>
-    <button @click="getData()" :disabled="!isLoggedin">get data</button>
-    <p>Server: {{ responseMessage }}</p>
+    <button @click="logout()" :disabled="!isLogin">logout</button>
+    <!-- <button @click="destroySession()">destroy session</button> -->
+
+    <button @click="addData()" :disabled="!isLogin">add data</button>
+    <button @click="getData()" :disabled="!isLogin">get data</button>
+    <button @click="checkSocketSession()" :disabled="!isLogin">
+      check socket session
+    </button>
+    <button @click="socketConnect()" :disabled="!isLogin">
+      socket connect
+    </button>
+    <button @click="socketDisconnect()" :disabled="!isLogin">
+      socket disconnect
+    </button>
+    <p>Http response: {{ httpResponse }}</p>
+    <p>Socketio Response: {{ socketioResponse }}</p>
   </div>
 </template>
 
@@ -18,16 +30,26 @@ export default {
   },
   data() {
     return {
-      responseMessage: null,
+      // responseMessage: null,
+      httpResponse: null,
+      socketioResponse: null,
       baseUrl: "http://localhost:9090",
       data: null,
-      isLoggedin: false,
+      isLogin: false,
     };
   },
   sockets: {
     connect() {
       console.log("Vue: connected!");
-      this.responseMessage = "Vue: connected!";
+      this.socketioResponse = "Vue: connected!";
+    },
+    addDataRes(responseMessage) {
+      console.log("Vue: addDataRes");
+      this.socketioResponse = responseMessage;
+    },
+    getDataRes(data) {
+      console.log("Vue:getDataRes");
+      this.socketioResponse = data;
     },
   },
   methods: {
@@ -35,10 +57,7 @@ export default {
       this.httpVisit("/");
     },
     login() {
-      this.isLoggedin = true;
-      // this.$socket.disconnect();
-      // this.$socket.connect();
-      // this.httpVisit("/login");
+      this.isLogin = true;
       let append = "/login";
       console.log("httpVisit:", append);
       let options = {
@@ -46,21 +65,33 @@ export default {
         url: this.baseUrl + append,
       };
       this.axios(options).then((res) => {
-        this.responseMessage = res["data"];
-        this.$socket.disconnect();
-        this.$socket.connect();
+        this.httpResponse = res["data"];
+        // this.socketDisconnect();
+        this.socketConnect();
       });
     },
     logout() {
-      this.isLoggedin = false;
-      this.$socket.disconnect();
+      this.isLogin = false;
+      this.socketDisconnect();
       this.httpVisit("/logout");
     },
+    // destroySession() {
+    //   this.httpVisit("/destroySession");
+    // },
     addData() {
       this.socketVisit("addData");
     },
     getData() {
       this.socketVisit("getData");
+    },
+    checkSocketSession() {
+      this.socketVisit("checkSocketSession");
+    },
+    socketConnect() {
+      this.$socket.connect();
+    },
+    socketDisconnect() {
+      this.$socket.disconnect();
     },
     httpVisit(append) {
       console.log("httpVisit:", append);
@@ -70,16 +101,8 @@ export default {
         // headers: { crossdomain: true },
       };
       this.axios(options).then((res) => {
-        // console.log("Server:", res["data"]);
         console.log("httpVisit res:", append);
-        console.log("type of res['data']:", typeof res["data"]);
-        if (typeof res["data"] === "object") {
-          console.log("get object");
-          this.data = res["data"];
-          console.log(this.data);
-        } else {
-          this.responseMessage = res["data"];
-        }
+        this.httpResponse = res["data"];
       });
     },
     socketVisit(event) {
