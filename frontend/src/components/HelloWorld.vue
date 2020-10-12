@@ -31,14 +31,18 @@ export default {
     connect() {
       console.log("Vue: connected!");
       this.responseMessage = "Vue: connected!";
+      // this.$socket.emit("reload");
     },
   },
   methods: {
     pingBackend() {
       this.httpVisit("/");
+
+      // this.$socket.disconnect();
     },
     login() {
       this.httpVisit("/login");
+      this.$socket.connect();
     },
 
     logout() {
@@ -77,6 +81,9 @@ export default {
     // this.login();
     // console.log("emit myConnection");
     // this.$socket.emit("myConnection");
+    // this.pingBackend();
+  },
+  created() {
     this.pingBackend();
   },
 };
