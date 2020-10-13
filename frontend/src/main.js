@@ -23,6 +23,8 @@ Vue.use(BootstrapVue);
 // Optionally install the BootstrapVue icon components plugin
 Vue.use(IconsPlugin);
 
+// import "vue2-dropzone/dist/vue2Dropzone.min.css";
+
 Vue.config.productionTip = false;
 
 new Vue({

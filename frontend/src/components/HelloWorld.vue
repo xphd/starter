@@ -1,16 +1,16 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <button @click="ping()">ping</button>
-    <button @click="login()">login</button>
-    <button @click="logout()" :disabled="!isLogin">logout</button>
+    <!-- <button @click="ping()">ping</button> -->
+    <!-- <button @click="login()">login</button> -->
+    <!-- <button @click="logout()" :disabled="!isLogin">logout</button> -->
 
     <!-- <button @click="destroySession()">destroy session</button>
     <button @click="destroySessionData()">destroy session data</button> -->
 
-    <button @click="addData()" :disabled="!isLogin">add data</button>
-    <button @click="getData()" :disabled="!isLogin">get data</button>
-    <button @click="checkSocketSession()" :disabled="!isLogin">
+    <button @click="addData()">add data</button>
+    <button @click="getData()">get data</button>
+    <!-- <button @click="checkSocketSession()" :disabled="!isLogin">
       check socket session
     </button>
     <button @click="socketConnect()" :disabled="!isLogin">
@@ -18,18 +18,23 @@
     </button>
     <button @click="socketDisconnect()" :disabled="!isLogin">
       socket disconnect
-    </button>
+    </button> -->
     <p>Http response: {{ httpResponse }}</p>
     <p>Socketio Response: {{ socketioResponse }}</p>
+    <!-- <vue-dropzone id="drop1" :options="dropOptions">drop zone</vue-dropzone> -->
   </div>
 </template>
 
 <script>
+// import vueDropzone from "vue2-dropzone";
 export default {
   name: "HelloWorld",
   props: {
     msg: String,
   },
+  // components: {
+  //   vueDropzone,
+  // },
   data() {
     return {
       // responseMessage: null,
@@ -37,7 +42,10 @@ export default {
       socketioResponse: null,
       baseUrl: "http://localhost:9090",
       data: null,
-      isLogin: false,
+      // isLogin: true,
+      dropOptions: {
+        url: "http://localhost:9090/post",
+      },
     };
   },
   sockets: {
@@ -56,11 +64,7 @@ export default {
   },
   methods: {
     ping() {
-      this.httpVisit("/");
-    },
-    login() {
-      this.isLogin = true;
-      let append = "/login";
+      let append = "/";
       console.log("httpVisit:", append);
       let options = {
         method: "GET",
@@ -72,41 +76,40 @@ export default {
         this.socketConnect();
       });
     },
-    logout() {
-      this.isLogin = false;
-      this.socketDisconnect();
-      this.httpVisit("/logout");
-    },
+
     // destroySession() {
     //   this.httpVisit("/destroySession");
     // },
     addData() {
-      this.socketVisit("addData");
+      let data = Math.random();
+      console.log(data);
+      // this.socketVisit("addData", data);
+      this.$socket.emit("addData", data);
     },
     getData() {
       this.socketVisit("getData");
     },
-    checkSocketSession() {
-      this.socketVisit("checkSocketSession");
-    },
+    // checkSocketSession() {
+    //   this.socketVisit("checkSocketSession");
+    // },
     socketConnect() {
       this.$socket.connect();
     },
-    socketDisconnect() {
-      this.$socket.disconnect();
-    },
-    httpVisit(append) {
-      console.log("httpVisit:", append);
-      let options = {
-        method: "GET",
-        url: this.baseUrl + append,
-        // headers: { crossdomain: true },
-      };
-      this.axios(options).then((res) => {
-        console.log("httpVisit res:", append);
-        this.httpResponse = res["data"];
-      });
-    },
+    // socketDisconnect() {
+    //   this.$socket.disconnect();
+    // },
+    // httpVisit(append) {
+    //   console.log("httpVisit:", append);
+    //   let options = {
+    //     method: "GET",
+    //     url: this.baseUrl + append,
+    //     // headers: { crossdomain: true },
+    //   };
+    //   this.axios(options).then((res) => {
+    //     console.log("httpVisit res:", append);
+    //     this.httpResponse = res["data"];
+    //   });
+    // },
     socketVisit(event) {
       console.log("socketVisit:", event);
       this.$socket.emit(event);

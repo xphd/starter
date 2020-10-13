@@ -1,18 +1,18 @@
 "use strict";
 
-const fs = require("fs");
-const parse = require("csv-parse");
-const csvString = require("csv-string");
-var csvData = [];
-let csvDataString = "";
-fs.createReadStream("./poverty_short.csv")
-  .pipe(parse({ delimiter: ":" }))
-  .on("data", function (csvrow) {
-    csvData.push(csvrow);
-  })
-  .on("end", function () {
-    csvDataString = csvString.stringify(csvData);
-  });
+// const fs = require("fs");
+// const parse = require("csv-parse");
+// const csvString = require("csv-string");
+// var csvData = [];
+// let csvDataString = "";
+// fs.createReadStream("./poverty_short.csv")
+//   .pipe(parse({ delimiter: ":" }))
+//   .on("data", function (csvrow) {
+//     csvData.push(csvrow);
+//   })
+//   .on("end", function () {
+//     csvDataString = csvString.stringify(csvData);
+//   });
 
 const http = require("http");
 const socketIO = require("socket.io");
@@ -50,26 +50,6 @@ let corsOptions = {
 app.use(cors(corsOptions));
 
 // if app.use, the order maters. "/" must be at the end
-app.use("/login", function (req, res) {
-  console.log("/login, sessID:", req.sessionID);
-  if (req.session.userinfo) {
-    console.log("session.userinfo:", req.session.userinfo);
-    res.send(req.session.userinfo + " has logged in");
-  } else {
-    req.session.userinfo = Math.floor(1000 + Math.random() * 9000); // random 4 digits ID, test purpose
-    console.log("session.userinfo:", req.session.userinfo);
-    res.send("successful log in！");
-  }
-});
-
-app.use("/logout", function (req, res) {
-  if (req.session.userinfo) {
-    delete req.session.userinfo;
-    res.send("You'vd logged out!");
-  } else {
-    res.send("You haven't logged in!!");
-  }
-});
 
 // app.use("/destroySession", function (req, res) {
 //   let sessionID = req.sessionID;
@@ -83,14 +63,15 @@ app.use("/logout", function (req, res) {
 //     console.log("no session to destroy"); // this should never show
 //   }
 // });
+// app.use("/post", function (req, res) {
+//   console.log("/post");
+//   console.log(req.body);
+//   res.sendStatus(200);
+// });
 
 app.use("/", function (req, res) {
   console.log("/, sessionID:", req.sessionID);
-  if (req.session.userinfo) {
-    res.send("hello " + req.session.userinfo + "，welcome");
-  } else {
-    res.send("NOT loggged in");
-  }
+  res.send("hello, " + req.sessionID);
 });
 
 serverSocket.use(
@@ -101,18 +82,15 @@ serverSocket.use(
 
 serverSocket.on("connection", (socket) => {
   console.log("Server: connected!");
-  let session = socket.handshake.session;
+  // let session = socket.handshake.session;
   let sessionID = socket.handshake.sessionID;
   let dataID = "sess:" + sessionID + "_data";
-  socket.on("addData", function () {
-    // console.log(">>>>>>>>>>>>>>>");
-    // console.log("socket: addData called");
-    // console.log("userinfo:", socket.handshake.session.userinfo);
-    // console.log("sessionID:", socket.handshake.sessionID);
-    // console.log("<<<<<<<<<<<<<<<");
-    if (session.userinfo) {
-      // let dataID ="sess:" +sessionID + "_data";
-      redisClient.set(dataID, csvDataString, redis.print);
+  socket.on("addData", function (data) {
+    if (sessionID) {
+      // redisClient.set(dataID, csvDataString, redis.print);
+      console.log(data);
+      redisClient.set(dataID, data, redis.print);
+
       redisClient.expireat(dataID, parseInt(+new Date() / 1000) + 300); // data exipres in 300 seconds
       socket.emit("addDataRes", "add data done");
     } else {
@@ -121,7 +99,7 @@ serverSocket.on("connection", (socket) => {
     }
   });
   socket.on("getData", function () {
-    if (session.userinfo) {
+    if (sessionID) {
       // let dataID = sessionID + "data";
       redisClient.get(dataID, function (err, reply) {
         socket.emit("getDataRes", reply);
@@ -131,11 +109,10 @@ serverSocket.on("connection", (socket) => {
       socket.emit("getDataRes", "NOT logged in");
     }
   });
-  socket.on("checkSocketSession", function () {
-    console.log("socket session", socket.handshake.session);
-    console.log("socket sessionID", socket.handshake.sessionID);
-  });
-  // socket.on("destroySession")
+  // socket.on("checkSocketSession", function () {
+  //   console.log("socket session", socket.handshake.session);
+  //   console.log("socket sessionID", socket.handshake.sessionID);
+  // });
 });
 
 server.listen(PORT);
