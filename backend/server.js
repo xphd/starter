@@ -113,6 +113,7 @@ serverSocket.on("connection", (socket) => {
     if (session.userinfo) {
       // let dataID ="sess:" +sessionID + "_data";
       redisClient.set(dataID, csvDataString, redis.print);
+      redisClient.expireat(dataID, parseInt(+new Date() / 1000) + 300); // data exipres in 300 seconds
       socket.emit("addDataRes", "add data done");
     } else {
       console.log("not logged in");

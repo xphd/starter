@@ -4,7 +4,9 @@
     <button @click="ping()">ping</button>
     <button @click="login()">login</button>
     <button @click="logout()" :disabled="!isLogin">logout</button>
-    <!-- <button @click="destroySession()">destroy session</button> -->
+
+    <!-- <button @click="destroySession()">destroy session</button>
+    <button @click="destroySessionData()">destroy session data</button> -->
 
     <button @click="addData()" :disabled="!isLogin">add data</button>
     <button @click="getData()" :disabled="!isLogin">get data</button>
