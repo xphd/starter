@@ -1,17 +1,13 @@
 "use strict";
 
-const {
-  Worker,
-  isMainThread,
-  parentPort,
-  workerData,
-} = require("worker_threads");
+const { DynamicPool } = require("node-worker-threads-pool");
+
+const dynamicPool = new DynamicPool(2);
 
 const http = require("http");
 const express = require("express");
 const session = require("express-session");
 const socketIO = require("socket.io");
-const fs = require("fs");
 
 const app = express();
 const server = http.createServer(app);
@@ -50,19 +46,37 @@ app.use("/login", function (req, res) {
 
     res.send("successful log in！");
   }
-  // const worker = new Worker("./compute.js", {
-  //   workerData: "hello",
-  // });
-
-  // worker.on("exit", (code) => {
-  //   if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
-  // });
-  // res.send("logged in");
 });
 
 app.use("/logout", function (req, res) {
   req.session.destroy();
   res.send("You'vd logged out!!");
+});
+
+let count = 0;
+
+function myFunc1(id) {
+  console.log("this is:", id);
+  console.log("before while");
+
+  // while (1) {}
+  function sleep(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+      currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
+  }
+  sleep(3000);
+  console.log("after while");
+}
+
+app.use("/startThread", function (req, res) {
+  dynamicPool.exec({
+    task: myFunc1,
+    param: count,
+  });
+  count++;
 });
 
 app.use("/", function (req, res) {
