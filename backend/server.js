@@ -11,7 +11,20 @@ const http = require("http");
 const express = require("express");
 const session = require("express-session");
 const socketIO = require("socket.io");
+
 const fs = require("fs");
+const parse = require("csv-parse");
+const csvString = require("csv-string");
+var csvData = [];
+let csvDataString = "";
+fs.createReadStream("poverty_short.csv")
+  .pipe(parse({ delimiter: ":" }))
+  .on("data", function (csvrow) {
+    csvData.push(csvrow);
+  })
+  .on("end", function () {
+    csvDataString = csvString.stringify(csvData);
+  });
 
 const app = express();
 const server = http.createServer(app);
@@ -44,25 +57,32 @@ app.use("/login", function (req, res) {
     res.send(req.session.userinfo + "has logged in");
   } else {
     req.session.userinfo = Math.random();
-    console.log(Object.keys(req));
-    console.log(req.sessionID);
-    console.log(req.session);
+    // console.log(Object.keys(req));
+    // console.log(req.sessionID);
+    // console.log(req.session);
 
     res.send("successful log in！");
   }
-  // const worker = new Worker("./compute.js", {
-  //   workerData: "hello",
-  // });
 
-  // worker.on("exit", (code) => {
-  //   if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
-  // });
   // res.send("logged in");
 });
 
 app.use("/logout", function (req, res) {
   req.session.destroy();
   res.send("You'vd logged out!!");
+});
+
+app.use("/doThread", function (req, res) {
+  const worker = new Worker("./compute.js", {
+    // workerData: csvData,
+  });
+  console.log("in server.js, thread id is", worker.threadId);
+
+  worker.on("exit", (code) => {
+    console.log("worker exit", worker.threadId);
+
+    if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
+  });
 });
 
 app.use("/", function (req, res) {

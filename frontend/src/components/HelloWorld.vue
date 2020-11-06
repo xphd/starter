@@ -3,6 +3,7 @@
     <h1>{{ msg }}</h1>
     <p>{{ responseMessage }}</p>
     <button @click="login()">login</button>
+    <button @click="doThread()">do thread</button>
   </div>
 </template>
 
@@ -40,6 +41,9 @@ export default {
     },
     logout() {
       this.visit("/logout");
+    },
+    doThread() {
+      this.visit("/doThread");
     },
     visit(append) {
       let options = {
