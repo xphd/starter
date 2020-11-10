@@ -4,6 +4,10 @@
     <p>{{ responseMessage }}</p>
     <button @click="login()">login</button>
     <button @click="doThread()">do thread</button>
+    <button @click="threadPool()">thread pool</button>
+    <button @click="poolDestroy()">pool destroy</button>
+    <button @click="createPool()">create pool</button>
+    <button @click="socketThreadPool()">socketThreadPool</button>
   </div>
 </template>
 
@@ -20,13 +24,19 @@ export default {
       data: null,
     };
   },
-  // sockets: {
-  //   connect() {
-  //     console.log("Vue: connected!");
-  //   },
-  // },
+  sockets: {
+    connect() {
+      console.log("Vue: connected!");
+    },
+    socketThreadPoolDone() {
+      console.log("socketThreadPoolDone !!");
+    },
+  },
 
   methods: {
+    socketThreadPool() {
+      this.$socket.emit("socketThreadPool");
+    },
     pingBackend() {
       this.visit("/");
     },
@@ -44,6 +54,15 @@ export default {
     },
     doThread() {
       this.visit("/doThread");
+    },
+    threadPool() {
+      this.visit("/threadPool");
+    },
+    poolDestroy() {
+      this.visit("/poolDestroy");
+    },
+    createPool() {
+      this.visit("/createPool");
     },
     visit(append) {
       let options = {
