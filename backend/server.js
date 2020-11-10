@@ -85,10 +85,10 @@ app.use("/doThread", function (req, res) {
     console.log("worker exit", worker.threadId);
 
     if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
-    console.log("before terminate");
-    worker.terminate().then(function () {
-      console.log("done terminate");
-    });
+    // console.log("before terminate");
+    // worker.terminate().then(function () {
+    //   console.log("done terminate");
+    // });
   });
   res.send("thread done!!!");
 });
@@ -113,11 +113,13 @@ app.use("/threadPool", function (req, res) {
 app.use("/createPool", function (req, res) {
   console.log("create pool");
   dynamicPool = new DynamicPool(4);
+  res.send("thread pool created");
 });
 
 app.use("/poolDestroy", function (req, res) {
   console.log("destroy threads in pool");
   dynamicPool.destroy();
+  res.send("thread pool destroyed");
 });
 
 app.use("/", function (req, res) {

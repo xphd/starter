@@ -9,9 +9,9 @@ function myFunc1(threadId) {
       currentDate = Date.now();
     } while (currentDate - date < milliseconds);
   }
-  console.log("before while ", threadId);
+  console.log(">>>>>> before while ", threadId);
   sleep(8000);
-  console.log("after while", threadId);
+  console.log("<<<<<< after while", threadId);
 }
 
 module.exports = myFunc1;
