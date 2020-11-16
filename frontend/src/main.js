@@ -3,21 +3,15 @@ import App from "./App.vue";
 
 import axios from "axios";
 import VueAxios from "vue-axios";
-// axios.defaults.withCredentials = true;
 Vue.use(VueAxios, axios);
 
-let host = location.host;
-let pathname = location.pathname;
-console.log(host);
-console.log(pathname);
-
 import VueSocketIO from "vue-socket.io";
-// const socket = new VueSocketIO({
-//   debug: true,
-//   // connection: "http://localhost:9090",
-//   connection: location + "/socket.io",
-// });
-// Vue.use(socket);
+const socket = new VueSocketIO({
+  debug: true,
+  options: { autoConnect: false }, // socket won't connect automatically. Must use "this.$socket.connect()" somewhere. Like in "App.vue" --Cong
+  connection: "http://localhost:9090",
+});
+Vue.use(socket);
 
 // use bootstrap
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";

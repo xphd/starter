@@ -2,7 +2,7 @@
   <div class="hello">
     <h1>{{ msg }}</h1>
     <p>{{ responseMessage }}</p>
-    <button @click="login()">login</button>
+    <button @click="createThread()">createThread</button>
   </div>
 </template>
 
@@ -14,50 +14,36 @@ export default {
   },
   data() {
     return {
-      responseMessage: "status",
+      responseMessage: "responseMessage",
       baseUrl: "http://localhost:9090",
       data: null,
     };
   },
-  // sockets: {
-  //   connect() {
-  //     console.log("Vue: connected!");
-  //   },
-  // },
+  mounted() {
+    this.visit("/");
+  },
+  sockets: {
+    connect() {
+      // console.log("Vue: socket connected!");
+      this.responseMessage = "Vue: socket connected!";
+    },
+  },
 
   methods: {
-    pingBackend() {
-      this.visit("/");
+    createThread() {
+      this.socketEmit("createThread");
     },
-    login() {
-      this.visit("/login");
-    },
-    addData() {
-      this.visit("/addData");
-    },
-    getData() {
-      this.visit("/getData");
-    },
-    logout() {
-      this.visit("/logout");
+    socketEmit(event) {
+      console.log("Call", event);
+      this.$socket.emit(event);
     },
     visit(append) {
       let options = {
         method: "GET",
         url: this.baseUrl + append,
-        // headers: { crossdomain: true },
       };
       this.axios(options).then((res) => {
-        // console.log("Server:", res["data"]);
-        console.log(append);
-        console.log(typeof res["data"]);
-        if (typeof res["data"] === "object") {
-          console.log("get object");
-          this.data = res["data"];
-          console.log(this.data);
-        } else {
-          this.responseMessage = res["data"];
-        }
+        this.responseMessage = res["data"];
       });
     },
   },
