@@ -1,118 +1,84 @@
 "use strict";
 
-// const fs = require("fs");
-// const parse = require("csv-parse");
-// const csvString = require("csv-string");
-// var csvData = [];
-// let csvDataString = "";
-// fs.createReadStream("./poverty_short.csv")
-//   .pipe(parse({ delimiter: ":" }))
-//   .on("data", function (csvrow) {
-//     csvData.push(csvrow);
-//   })
-//   .on("end", function () {
-//     csvDataString = csvString.stringify(csvData);
-//   });
-
 const http = require("http");
-const socketIO = require("socket.io");
 const express = require("express");
-const express_session = require("express-session");
 const sharedsession = require("express-socket.io-session");
+const socketIO = require("socket.io");
+
+// const { DynamicPool } = require("node-worker-threads-pool");
+// let numberOfThreads = 4;
+// let dynamicPool = new DynamicPool(numberOfThreads);
 
 const app = express();
 const server = http.createServer(app);
 const serverSocket = socketIO(server);
 const PORT = 9090;
 
+// const socket_listeners = require("./socket_listeners");
+
+const express_session = require("express-session");
 // >------>
 const redis = require("redis");
-const connect_redis = require("connect-redis");
-const redisStore = connect_redis(express_session);
-const redisClient = redis.createClient(6379, "127.0.0.1");
+// const connect_redis = require("connect-redis");
+// const redisStore = connect_redis(express_session);
+// const redisClient = redis.createClient(6379, "127.0.0.1");
 // <------<
 
-const session = express_session({
+// set express session
+let express_session_instance = express_session({
   secret: "keyboard cat",
   resave: false,
   saveUninitialized: true,
   cookie: ("name", "value", { maxAge: 5 * 60 * 1000, secure: false }),
-  store: new redisStore({ client: redisClient }),
+  // store: new redisStore({ client: redisClient }),
 });
-app.use(session);
+app.use(express_session_instance);
 
+// set cors, for cross-origin
 const cors = require("cors");
-let corsOptions = {
+let cors_instance = cors({
   origin: ["http://localhost:8080", "https://localhost:8080"],
   credentials: true,
   exposedHeaders: ["set-cookie"],
-};
-app.use(cors(corsOptions));
-
-// if app.use, the order maters. "/" must be at the end
-
-// app.use("/destroySession", function (req, res) {
-//   let sessionID = req.sessionID;
-//   if (sessionID) {
-//     let dataID = "sess:" + sessionID + "_data";
-//     redisClient.del(dataID);
-//     req.session.destroy(function () {
-//       res.send("destroy session:" + sessionID);
-//     });
-//   } else {
-//     console.log("no session to destroy"); // this should never show
-//   }
-// });
-// app.use("/post", function (req, res) {
-//   console.log("/post");
-//   console.log(req.body);
-//   res.sendStatus(200);
-// });
+});
+app.use(cors_instance);
 
 app.use("/", function (req, res) {
-  console.log("/, sessionID:", req.sessionID);
-  res.send("hello, " + req.sessionID);
+  console.log(req.sessionID);
+  res.send(req.sessionID + " logged in successfully!");
 });
 
+server.listen(PORT);
+console.log("Server listening", PORT);
+
 serverSocket.use(
-  sharedsession(session, {
+  sharedsession(express_session_instance, {
     autoSave: true, // must have to update redis
   })
 );
 
+// const Groom = require("./Groom/Groom.js");
+
+const { Worker } = require("worker_threads");
+const threads_map = new Map();
+
 serverSocket.on("connection", (socket) => {
-  console.log("Server: connected!");
-  // let session = socket.handshake.session;
-  let sessionID = socket.handshake.sessionID;
-  let dataID = "sess:" + sessionID + "_data";
-  socket.on("addData", function (data) {
-    if (sessionID) {
-      // redisClient.set(dataID, csvDataString, redis.print);
-      console.log(data);
-      redisClient.set(dataID, data, redis.print);
+  console.log("Server socket is connected!");
+  // let groom = new Groom();
+  // socket_listeners.set(groom);
 
-      redisClient.expireat(dataID, parseInt(+new Date() / 1000) + 300); // data exipres in 300 seconds
-      socket.emit("addDataRes", "add data done");
-    } else {
-      console.log("not logged in");
-      socket.emit("addDataRes", "NOT logged in");
-    }
+  socket.on("createThread", () => {
+    console.log("createThread called");
+    // const worker = new Worker("./job.js");
+    // threads_map.set(worker.threadId, worker);
+    // console.log("worker thread created, threadId:", worker.threadId);
   });
-  socket.on("getData", function () {
-    if (sessionID) {
-      // let dataID = sessionID + "data";
-      redisClient.get(dataID, function (err, reply) {
-        socket.emit("getDataRes", reply);
-      });
-    } else {
-      console.log("not logged in");
-      socket.emit("getDataRes", "NOT logged in");
-    }
+
+  socket.on("getThreads", () => {
+    console.log("getThreads called");
   });
-  // socket.on("checkSocketSession", function () {
-  //   console.log("socket session", socket.handshake.session);
-  //   console.log("socket sessionID", socket.handshake.sessionID);
-  // });
+
+  socket.on("deleteThread", () => {
+    console.log("deleteThread called");
+  });
 });
-
-server.listen(PORT);
