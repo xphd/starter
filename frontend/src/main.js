@@ -3,6 +3,13 @@ import App from "./App.vue";
 
 import axios from "axios";
 import VueAxios from "vue-axios";
+
+/** By Cong Liu.
+ * "axios.defaults.withCredentials" must be set as "ture" so that express-session in backend can work properly.
+ * Otherwise, the sessionID will be replaced when the page is refreshed
+ */
+axios.defaults.withCredentials = true;
+
 Vue.use(VueAxios, axios);
 
 import VueSocketIO from "vue-socket.io";
