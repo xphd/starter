@@ -5,9 +5,9 @@ const express = require("express");
 const sharedsession = require("express-socket.io-session");
 const socketIO = require("socket.io");
 
-// const { DynamicPool } = require("node-worker-threads-pool");
-// let numberOfThreads = 4;
-// let dynamicPool = new DynamicPool(numberOfThreads);
+const { DynamicPool } = require("node-worker-threads-pool");
+let numberOfThreads = 4;
+let dynamicPool = new DynamicPool(numberOfThreads);
 
 const app = express();
 const server = http.createServer(app);
@@ -59,26 +59,43 @@ serverSocket.use(
 
 // const Groom = require("./Groom/Groom.js");
 
-const { Worker } = require("worker_threads");
-const threads_map = new Map();
+const job = require("./job.js");
 
 serverSocket.on("connection", (socket) => {
   console.log("Server socket is connected!");
   // let groom = new Groom();
   // socket_listeners.set(groom);
 
+  socket.on("createThreadinPool", () => {
+    dynamicPool
+      .exec({
+        task: job,
+        // timeout: 10000,
+      })
+      .then(() => {
+        console.log("done"); // result will be 2.
+        // socket.emit("socketThreadPoolDone");
+      });
+    // job();
+  });
+
   socket.on("createThread", () => {
     console.log("createThread called");
-    // const worker = new Worker("./job.js");
+
+    // const worker = new Worker("./job2.js");
     // threads_map.set(worker.threadId, worker);
     // console.log("worker thread created, threadId:", worker.threadId);
   });
 
   socket.on("getThreads", () => {
     console.log("getThreads called");
+
+    console.log("threads_array in server.js", global.threads_array);
   });
 
   socket.on("deleteThread", () => {
     console.log("deleteThread called");
+
+    dynamicPool.destroy();
   });
 });

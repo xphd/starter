@@ -3,6 +3,7 @@
     <h1>{{ msg }}</h1>
     <p>{{ httpResponse }}</p>
     <p>{{ responseMessage }}</p>
+    <button @click="createThreadinPool()">createThreadinPool</button>
     <button @click="createThread()">createThread</button>
     <button @click="getThreads()">getThreads</button>
     <button @click="deleteThread()">deleteThread</button>
@@ -30,6 +31,9 @@ export default {
     socketEmit(event) {
       console.log("Socket Emit:", event);
       this.$socket.emit(event);
+    },
+    createThreadinPool() {
+      this.socketEmit("createThreadinPool");
     },
     createThread() {
       this.socketEmit("createThread");
