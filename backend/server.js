@@ -5,9 +5,9 @@ const express = require("express");
 const sharedsession = require("express-socket.io-session");
 const socketIO = require("socket.io");
 
-const { DynamicPool } = require("node-worker-threads-pool");
-let numberOfThreads = 4;
-let dynamicPool = new DynamicPool(numberOfThreads);
+const Piscina = require("piscina");
+const { AbortController } = require("abort-controller");
+const { resolve } = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -57,45 +57,51 @@ serverSocket.use(
   })
 );
 
-// const Groom = require("./Groom/Groom.js");
-
-const job = require("./job.js");
+const piscina = new Piscina({
+  filename: resolve(__dirname, "job.js"),
+  minThreads: 2,
+  maxThreads: 5,
+});
 
 serverSocket.on("connection", (socket) => {
   console.log("Server socket is connected!");
+
+  (async function () {
+    const abortController = new AbortController();
+    try {
+      const task = piscina.runTask({ a: 4, b: 5 }, abortController.signal);
+      // abortController.abort();
+      await task;
+    } catch (err) {
+      console.log(err);
+      console.log("The task was canceled");
+    }
+  })();
+
   // let groom = new Groom();
   // socket_listeners.set(groom);
 
-  socket.on("createThreadinPool", () => {
-    dynamicPool
-      .exec({
-        task: job,
-        // timeout: 10000,
-      })
-      .then(() => {
-        console.log("done"); // result will be 2.
-        // socket.emit("socketThreadPoolDone");
-      });
-    // job();
-  });
+  // socket.on("createThreadinPool", () => {});
 
-  socket.on("createThread", () => {
-    console.log("createThread called");
+  // socket.on("createThread", () => {
+  //   console.log("createThread called");
 
-    // const worker = new Worker("./job2.js");
-    // threads_map.set(worker.threadId, worker);
-    // console.log("worker thread created, threadId:", worker.threadId);
-  });
+  //   (async function () {
+  //     const abortController = new AbortController();
+  //     try {
+  //       const task = piscina.runTask(null, abortController.signal);
+  //       // abortController.abort();
+  //       await task;
+  //     } catch (err) {
+  //       console.log(err);
+  //       console.log("The task was canceled");
+  //     }
+  //   })();
+  // });
 
-  socket.on("getThreads", () => {
-    console.log("getThreads called");
+  // socket.on("getThreads", () => {});
 
-    console.log("threads_array in server.js", global.threads_array);
-  });
-
-  socket.on("deleteThread", () => {
-    console.log("deleteThread called");
-
-    dynamicPool.destroy();
-  });
+  // socket.on("deleteThread", () => {
+  //   console.log("deleteThread called");
+  // });
 });
