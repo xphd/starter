@@ -3,8 +3,8 @@
     <h1>{{ msg }}</h1>
     <p>{{ message }}</p>
     <p>{{ responseMessage }}</p>
-    <button @click="pingBackend()">pingBackend</button>
     <button @click="pingSocket()">pingSocket</button>
+    <button @click="pingBackend()">pingBackend</button>
   </div>
 </template>
 
@@ -25,6 +25,10 @@ export default {
     connect() {
       console.log("Vue: connected!");
       this.message = "Vue: connected!";
+    },
+    pingSocketRes() {
+      console.log("Vue: pingSocketRes!");
+      this.message = "Vue: pingSocketRes!";
     },
   },
   mounted() {
