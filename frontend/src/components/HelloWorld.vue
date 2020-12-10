@@ -1,6 +1,10 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
+    <p>{{ message }}</p>
+    <p>{{ responseMessage }}</p>
+    <button @click="pingBackend()">pingBackend</button>
+    <button @click="pingSocket()">pingSocket</button>
   </div>
 </template>
 
@@ -10,9 +14,45 @@ export default {
   props: {
     msg: String,
   },
+  data() {
+    return {
+      message: "message",
+      responseMessage: "responseMessage",
+      baseUrl: "", // "http://localhost:9090", see proxy in vue.config.js
+    };
+  },
   sockets: {
     connect() {
       console.log("Vue: connected!");
+      this.message = "Vue: connected!";
+    },
+  },
+  mounted() {
+    // this.pingBackend();
+    // this.pingSocket();
+    // console.log("location in HelloWorld.vue is:", location);
+  },
+
+  methods: {
+    pingBackend() {
+      console.log("vue: pingBackend called");
+      this.visit("/cong");
+    },
+    visit(append) {
+      console.log("this.baseUrl + append", this.baseUrl + append);
+      let options = {
+        method: "GET",
+        url: this.baseUrl + append,
+        headers: { crossdomain: true },
+      };
+      this.axios(options).then((res) => {
+        console.log("axios res");
+        this.responseMessage = res["data"];
+      });
+    },
+    pingSocket() {
+      console.log("vue: pingSocket called ");
+      this.$socket.emit("pingSocket");
     },
   },
 };

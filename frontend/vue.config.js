@@ -1,7 +1,27 @@
 // vue.config.js
 module.exports = {
-  // options...
   devServer: {
-    disableHostCheck: true,
+    // disableHostCheck: true,
+    proxy: {
+      "/socket.io": {
+        target: "http://localhost:9090/",
+        secure: false,
+        ws: true,
+      },
+      // "/sockjs-node": {
+      //   target: "http://localhost:9090/",
+      //   secure: false,
+      //   ws: true,
+      // },
+      "/cong": {
+        target: "http://localhost:9090/",
+        secure: false,
+        ws: true,
+        // pathRewrite: {
+        //   "^cong": "",
+        // },
+      },
+    },
+    allowedHosts: [".datadrivendiscovery.org"], // include this to avoid "invalid host header" error
   },
 };

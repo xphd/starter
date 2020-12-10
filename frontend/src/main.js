@@ -1,10 +1,21 @@
 import Vue from "vue";
 import App from "./App.vue";
 
+import axios from "axios";
+import VueAxios from "vue-axios";
+axios.defaults.withCredentials = true;
+Vue.use(VueAxios, axios);
+
+// let host = location.host;
+// let pathname = location.pathname;
+console.log("location in main.js is:", location);
+// console.log(host);
+// console.log(pathname);
+
 import VueSocketIO from "vue-socket.io";
 const socket = new VueSocketIO({
   debug: true,
-  connection: "http://localhost:9090"
+  connection: location.host, // "http://localhost:9090", see proxy in vue.config.js
 });
 Vue.use(socket);
 
@@ -22,5 +33,5 @@ Vue.config.productionTip = false;
 new Vue({
   render: function(h) {
     return h(App);
-  }
+  },
 }).$mount("#app");
