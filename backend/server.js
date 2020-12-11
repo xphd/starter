@@ -35,5 +35,6 @@ serverSocket.on("connection", (socket) => {
   console.log("Server: connected!");
   socket.on("pingSocket", function () {
     console.log("server: pingSocket called");
+    socket.emit("pingSocketRes", "pingSocketRes");
   });
 });
