@@ -1,7 +1,7 @@
 cd backend
 yarn serve &
 
-cd ..
+# cd ..
 
-cd frontend
-yarn serve
+# cd frontend
+# yarn serve
